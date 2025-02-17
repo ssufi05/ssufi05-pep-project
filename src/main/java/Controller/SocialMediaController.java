@@ -77,10 +77,28 @@ public class SocialMediaController {
      */
     private void postLoginHandler(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        Account input = mapper.readValue(ctx.body(), Account.class);
-        Account existAccount = accountService.getAccountByUsername(input.getUsername());
-
-
+        
+        // Parse the request body into an Account object
+        Account inputAccount = mapper.readValue(ctx.body(), Account.class);
+        
+        // Validate input: username and password must not be null or empty
+        if (inputAccount.getUsername() == null || inputAccount.getPassword() == null ||
+            inputAccount.getUsername().isEmpty() || inputAccount.getPassword().isEmpty()) {
+            ctx.status(401);
+            return;
+        }
+    
+        // Retrieve account from database by username
+        Account existingAccount = accountService.getAccountByUsername(inputAccount.getUsername());
+    
+        // Check if the account exists and if the password matches
+        if (existingAccount != null && existingAccount.getPassword().equals(inputAccount.getPassword())) {
+            // Login successful: return the account including its account_id
+            ctx.json(existingAccount);
+        } else {
+            // Login failed: return 401 Unauthorized
+            ctx.status(401);
+        }
     }
     /**
      * Handler to process new Messages
@@ -91,10 +109,11 @@ public class SocialMediaController {
         Message input = mapper.readValue(ctx.body(), Message.class);
         Account existAccount = accountService.getAccountByID(input.getPosted_by());
         if (input.getMessage_text() != "" && input.getMessage_text().length() <= 255 && existAccount != null) {
-            Message good = messageService.addMessage(input);
-            int real_id = good.getMessage_id();
-           // input.setMessage_id(good.message_id);
-            ctx.json(mapper.writeValueAsString(input));
+            Message addedMessage = messageService.addMessage(input);
+           // int real_id = good.getMessage_id();
+           // input.setMessage_id(addedMessage.getMessage_id());
+
+            ctx.json(mapper.writeValueAsString(addedMessage));
             ctx.status(200);
         }
         else {
