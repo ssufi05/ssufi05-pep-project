@@ -77,28 +77,24 @@ public class SocialMediaController {
      */
     private void postLoginHandler(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        Account account = mapper.readValue(ctx.body(), Account.class);
-        Account existAccount = accountService.getAccountByUsername(account.getUsername());
-        account.setAccount_id(existAccount.getAccount_id());
-        if (account.getUsername() == existAccount.getUsername() && account.getPassword() == existAccount.getPassword() && account.getUsername() != null) {
-            ctx.json(mapper.writeValueAsString(account));
-            ctx.status(200);
-        }
-        else {
-            ctx.status(401);
-        }
+        Account input = mapper.readValue(ctx.body(), Account.class);
+        Account existAccount = accountService.getAccountByUsername(input.getUsername());
+
+
     }
     /**
-     * Handler to process User logins
+     * Handler to process new Messages
      * ## 3: Our API should be able to process the creation of new messages.
      */
     private void postMessagesHandler(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        Message message = mapper.readValue(ctx.body(), Message.class);
-        Account existAccount = accountService.getAccountByID(message.getPosted_by());
-        if (message.getMessage_text() != "" && message.getMessage_text().length() <= 255 && existAccount != null) {
-            messageService.addMessage(message);
-            ctx.json(mapper.writeValueAsString(message));
+        Message input = mapper.readValue(ctx.body(), Message.class);
+        Account existAccount = accountService.getAccountByID(input.getPosted_by());
+        if (input.getMessage_text() != "" && input.getMessage_text().length() <= 255 && existAccount != null) {
+            Message good = messageService.addMessage(input);
+            int real_id = good.getMessage_id();
+           // input.setMessage_id(good.message_id);
+            ctx.json(mapper.writeValueAsString(input));
             ctx.status(200);
         }
         else {
@@ -147,6 +143,8 @@ public class SocialMediaController {
         Message message = messageService.getMessageByID(messageId);
         if (message != null && newMessage.getMessage_text().length() <= 255 && newMessage.getMessage_text() != "" && newMessage.getMessage_text() != null) {
             Message updatedMessage = messageService.updateMessage(messageId, message);
+            String newText = newMessage.getMessage_text();
+            updatedMessage.setMessage_text(newText);
 
             ctx.json(updatedMessage);
         }
