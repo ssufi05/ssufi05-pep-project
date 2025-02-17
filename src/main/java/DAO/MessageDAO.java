@@ -27,7 +27,12 @@ public class MessageDAO {
             preparedStatement.setLong(3, message.getTime_posted_epoch());
 
             preparedStatement.executeUpdate();
-            return message;
+            ResultSet pkeyResultSet = preparedStatement.getGeneratedKeys();
+            if(pkeyResultSet.next()){
+                int generated_message_id = (int) pkeyResultSet.getLong(1);
+                return new Message(generated_message_id, message.getPosted_by(), 
+                                    message.getMessage_text(), message.getTime_posted_epoch());
+            }
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
@@ -112,7 +117,7 @@ public class MessageDAO {
      * @param id a message ID.
      * @param message a message object. the message object does not contain a flight ID.
      */
-    public void updateMessage(int id, Message message){
+    public Message updateMessage(int id, Message message){
         Connection connection = ConnectionUtil.getConnection();
         try {
             //Write SQL logic here
@@ -126,9 +131,12 @@ public class MessageDAO {
             preparedStatement.setInt(4, id);
 
             preparedStatement.executeUpdate();
+            return new Message(id, message.getPosted_by(), message.getMessage_text(), message.getTime_posted_epoch());
+            
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
+        return null;
     }
         /**
      * TODO: Retrieve all messages from a particular Account.

@@ -76,13 +76,7 @@ public class MessageService {
      */
     public Message updateMessage(int message_id, Message message){
 
-        if (messageDAO.getMessageById(message_id) == null) {
-            return null;
-        }
-        
-        messageDAO.updateMessage(message_id, message);
-        Message mes = messageDAO.getMessageById(message_id);
-        return mes;
+        return messageDAO.updateMessage(message_id, message);
     }
     /**
      * TODO: Use the MessageDAO to retrieve a List containing all messages from a particular Account

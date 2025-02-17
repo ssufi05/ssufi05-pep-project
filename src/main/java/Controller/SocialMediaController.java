@@ -46,7 +46,7 @@ public class SocialMediaController {
         app.get("/messages/{message_id}", this::getMessageByID);
         app.delete("/messages/{message_id}", this::deleteMessageByID);
         app.patch("/messages/{message_id}", this::updateMessage);
-        app.get("/accounts/{account_id}", this::getAllMessagesByUser);
+        app.get("/accounts/{account_id}/messages", this::getAllMessagesByUser);
 
         return app;
     }
@@ -60,10 +60,12 @@ public class SocialMediaController {
         ObjectMapper mapper = new ObjectMapper();
         Account account = mapper.readValue(ctx.body(), Account.class);
         Account existAccount = accountService.getAccountByUsername(account.getUsername());
-        if (account.getUsername() != null && account.getPassword().length() >=4 && existAccount == null) {
+        if (account.getUsername() != null && account.getPassword().length() >=4 && existAccount == null && account.getUsername() != "") {
+            Account addedAccount = accountService.getAccountByUsername(account.getUsername());
+            accountService.addAccount(addedAccount);
             ctx.json(mapper.writeValueAsString(account));
             ctx.status(200);
-            accountService.addAccount(account);
+
         }
         else {
             ctx.status(400);
@@ -94,7 +96,7 @@ public class SocialMediaController {
         ObjectMapper mapper = new ObjectMapper();
         Message message = mapper.readValue(ctx.body(), Message.class);
         Account existAccount = accountService.getAccountByID(message.getPosted_by());
-        if (message.getMessage_text() != null && message.getMessage_text().length() <= 255 && existAccount.getUsername() != null) {
+        if (message.getMessage_text() != "" && message.getMessage_text().length() <= 255 && existAccount != null) {
             messageService.addMessage(message);
             ctx.json(mapper.writeValueAsString(message));
             ctx.status(200);
@@ -115,16 +117,24 @@ public class SocialMediaController {
      * ## 5: Our API should be able to retrieve a message by its ID.
      */
     private void getMessageByID(Context ctx) throws JsonProcessingException {
-        int messageId = Integer.parseInt(ctx.pathParam("message_id"));
-        ctx.json(messageService.getMessageByID(messageId));
+        int messageId = Integer.parseInt(ctx.pathParam("{message_id}"));
+        Message message = messageService.getMessageByID(messageId);
+        if (message != null) {
+            ctx.json(message);
+        }
     }
     /**
      * Handler to delete a message by its id
      * ## 6: Our API should be able to delete a message identified by a message ID.
      */
     private void deleteMessageByID(Context ctx) throws JsonProcessingException {
-        int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+        int messageId = Integer.parseInt(ctx.pathParam("{message_id}"));
+        Message existingMessage = messageService.getMessageByID(messageId);
+        if (existingMessage != null) {
+            ctx.json(existingMessage);
+        }
         messageService.deleteMessageByID(messageId);
+
     }
     /**
      * Handler to update a message by its id
@@ -132,16 +142,25 @@ public class SocialMediaController {
      */
     private void updateMessage(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        int messageId = Integer.parseInt(ctx.pathParam("message_id"));
-        Message message = mapper.readValue(ctx.body(), Message.class);
-        messageService.updateMessage(messageId, message);
+        Message newMessage = mapper.readValue(ctx.body(), Message.class);
+        int messageId = Integer.parseInt(ctx.pathParam("{message_id}"));
+        Message message = messageService.getMessageByID(messageId);
+        if (message != null && newMessage.getMessage_text().length() <= 255 && newMessage.getMessage_text() != "" && newMessage.getMessage_text() != null) {
+            Message updatedMessage = messageService.updateMessage(messageId, message);
+
+            ctx.json(updatedMessage);
+        }
+        else {
+            ctx.status(400);
+        }
+    
     }
     /**
      * Handler to retrieve all messages by a user
      * ## 8: Our API should be able to retrieve all messages written by a particular user.
      */
     private void getAllMessagesByUser(Context ctx) throws JsonProcessingException {
-        int account_id = Integer.parseInt(ctx.pathParam("message_id"));
+        int account_id = Integer.parseInt(ctx.pathParam("account_id"));
         ctx.json(messageService.getAllMessagesFromUser(account_id));
     }
 }
