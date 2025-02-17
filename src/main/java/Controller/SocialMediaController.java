@@ -60,10 +60,10 @@ public class SocialMediaController {
         ObjectMapper mapper = new ObjectMapper();
         Account account = mapper.readValue(ctx.body(), Account.class);
         Account existAccount = accountService.getAccountByUsername(account.getUsername());
-        if (account.getUsername() != null && account.getPassword().length() >=4 && existAccount == null && account.getUsername() != "") {
-            Account addedAccount = accountService.getAccountByUsername(account.getUsername());
-            accountService.addAccount(addedAccount);
-            ctx.json(mapper.writeValueAsString(account));
+        
+        if (account.getUsername() != null && account.getPassword().length() >=4  && account.getUsername() != "" && existAccount == null) {
+            Account addedAccount = accountService.addAccount(account);
+            ctx.json(mapper.writeValueAsString(addedAccount));
             ctx.status(200);
 
         }
