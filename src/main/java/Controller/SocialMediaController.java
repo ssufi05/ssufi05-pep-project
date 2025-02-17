@@ -1,7 +1,10 @@
 package Controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import Model.Account;
+import Service.AccountService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
@@ -23,6 +26,10 @@ import io.javalin.http.Context;
  * 
  */
 public class SocialMediaController {
+    AccountService accountService;
+    public SocialMediaController() {
+        accountService = new AccountService();
+    }
     /**
      * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test
      * suite must receive a Javalin object from this method.
@@ -31,7 +38,12 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.post("/register", this::postRegisterHandler);
-        app.start(8080);
+        app.post("/login", this::postLoginHandler);
+        app.post("/messages", this::postMessagesHandler);
+        app.get("/messages", this::getAllMessages);
+        app.get("/messages/{message_id}", this::getMessageByID);
+        app.delete("/messages/{message_id}", this::deleteMessageByID);
+        app.patch("/messages/{message_id}", this::updateMessage);
 
         return app;
     }
@@ -42,7 +54,21 @@ public class SocialMediaController {
      * @param context The Javalin Context object manages information about both the HTTP request and response.
      */
     private void postRegisterHandler(Context ctx) throws JsonProcessingException {
-        ObjectMapper
+        ObjectMapper mapper = new ObjectMapper();
+        Account account = mapper.readValue(ctx.body(), Account.class);
+        Account addedAccount = accountService.addAccount(account);
+        if ()
+
+    }
+
+    /**
+     * Handler to post a new account
+     * @param context The Javalin Context object manages information about both the HTTP request and response.
+     */
+    private void postLoginHandler(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Account account = mapper.readValue(ctx.body(), Account.class);
+        Account loggedAccount = 
 
     }
 
