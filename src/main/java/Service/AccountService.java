@@ -28,4 +28,22 @@ public class AccountService {
     public Account addAccount(Account account) {
         return accountDAO.insertAccount(account);
     }
+    /**
+     * TODO: Use the AccountDAO to retrieve an Account given the username.
+     *
+     * @param account_id the id of an account object.
+     * @return The account object if it is in the table.
+     */
+    public Account getAccountByID(int account_id) {
+        return accountDAO.getAccountByID(account_id);
+    }
+    /**
+     * TODO: Use the AccountDAO to retrieve an Account given the username.
+     *
+     * @param username the username of an account object.
+     * @return The account object if it is in the table.
+     */
+    public Account getAccountByUsername(String username) {
+        return accountDAO.getAccountByUsername(username);
+    }
 }

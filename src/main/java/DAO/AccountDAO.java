@@ -40,5 +40,61 @@ public class AccountDAO {
         }
         return null;
     }
+        /**
+     * TODO: Retrieve a specific account using its account username.
+     *
+     *
+     * @param account_id an account id.
+     */
+    public Account getAccountByID(int account_id){
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            //Write SQL logic here
+            String sql = "SELECT * FROM account WHERE account_id=?;";
+            
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+
+            preparedStatement.setInt(1, account_id);
+
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                Account account = new Account(rs.getInt("account_id"), rs.getString("username"),
+                        rs.getString("password"));
+                return account;
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    /**
+     * TODO: Retrieve a specific account using its account username.
+     *
+     *
+     * @param username an account username.
+     */
+    public Account getAccountByUsername(String username){
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            //Write SQL logic here
+            String sql = "SELECT * FROM account WHERE username=?;";
+            
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+
+            preparedStatement.setString(1, username);
+
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                Account account = new Account(rs.getInt("account_id"), rs.getString("username"),
+                        rs.getString("password"));
+                return account;
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
     
 }
